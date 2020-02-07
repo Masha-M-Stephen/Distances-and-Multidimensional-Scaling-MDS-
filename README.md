@@ -1,0 +1,2 @@
+# Distances-and-Multidimensional-Scaling-MDS-
+The Deferred Action for Childhood Arrivals (DACA) program has been given a 6-month phaseout by the current administration, unless Congress comes up with a legislative fix. These data give the number of applications, number of accepted applications, number of approved applications and some additional related statistics on a by state basis (including the District of Columbia) in the United States.
