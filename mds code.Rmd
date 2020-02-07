@@ -137,7 +137,7 @@ Do there are appear to groups of genes that express together? If so, pick one of
 a small number of members and list the genes that make up that group
 
 
-```{r}
+```{r fig.height=15, fig.width=15}
 library(corrplot)
 alon.cor = cor(alon.mat)
 #alon.cor
