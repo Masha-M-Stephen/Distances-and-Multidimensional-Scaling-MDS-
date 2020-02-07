@@ -1,0 +1,271 @@
+---
+title: "Distances and Multidimensional Scaling (MDS)"
+author: "Masha"
+date: "2/6/2020"
+output: 
+   md_document:
+    variant: markdown_github
+---
+
+```{r}
+library (MASS)
+#library(rgl)
+```
+
+#Dataset
+```{r}
+DACA = read.csv("C:/Users/fb8502oa/Desktop/DSCI 415/DSCI 415 fall/DACA.csv", header=TRUE)
+head(DACA)
+```
+
+1.Use the raw data, which is mostly counts, to create metrics
+
+#select variables v1, v2, v3 and subsetting 
+#I am interested to see how the lawsuits were approved depending per race. Eg:
+  #1.Approved per white vs Approved per black.
+  #2.Approved per Hispanic and Approved per Asian.
+
+```{r}
+my_data=DACA[,c(17:20)]
+```
+
+
+2. Using the data and the metrics I created to conduct a metric MDS (or non-metric MDS) with k=2 dimensions, K=3 dimensions.   
+ Finding the stress and Constructing a plot of the dimensions created and label the points by state, coloring the points by lawsuit status. 
+
+```{r}
+##scaling the data is very important
+Daca.scale =scale(my_data) 
+##now finding the distance 
+Dacadis = dist(Daca.scale)
+##k=2
+Daca.samm = sammon(Dacadis,k=2)
+```
+
+```{r echo=TRUE, fig.height=10, fig.width=10}
+#plotting
+plot(Daca.samm$points,type="n")
+text(Daca.samm$points,as.character(DACA$State),col=as.numeric(DACA$Lawsuit)+2) ##the 2 is for the coloring. 
+##The very blue ones are lawsuits against obama, the light blue are against trump while the green is no lawsuits.
+```
+comments for #2. 
+The outliers from
+sammon make sense since California was among the leading state in lawsuits against trump
+while Texas had lawsuits against Obama.
+The dark blue are the states that have lawsuits against Obama while the light blue states
+have lawsuits against trump while the green states had none.
+The initial stress is key = 0.03017
+
+
+3.Repeat part (2) using 𝑘 = 3 dimensions
+
+```{r eval=FALSE, include=FALSE}
+##k=3
+Daca.samm3d = sammon(Dacadis,k=3) 
+##install plot 3-d (rgl)
+plot3d(Daca.samm3d$points,type="n")
+text3d(Daca.samm3d$points, texts= as.character(DACA$State),col=as.numeric(DACA$Lawsuit)+3)
+```
+
+
+Problem 2 - Gene Expression Levels for Colon Tissue Samples
+These data come from a microarray experiment where gene expression levels were measured
+for colon tissues samples from 40 individuals with colon cancer and 22 individuals without
+colon cancer. Below is a blurb about microarray experiments taken from Modern Multivariate
+Statistical Techniques by Alan Izenman.
+
+#The dataset
+```{r}
+Alontop = read.csv("C:/Users/fb8502oa/Desktop/DSCI 415/DSCI 415 fall/Alontop.csv")
+View(Alontop)
+```
+
+Form a distance matrix for the 62 tissue samples using Euclidean distance. Is scaling
+important? Why or why not? Give summary statistics for the pairwise distances in the
+distance matrix.
+```{r}
+names(Alontop)
+alon.mat = Alontop[,-93]
+
+dist2 = as.matrix(dist(alon.mat))
+dist2
+
+summary(as.numeric(dist2))
+```
+
+Using the distance matrix 𝐷 formed in part (a) conduct a metric (classical) multidimensional
+scaling using 𝑘 = 2 dimensions. What is the stress of this representation? Construct a plot
+of the two dimensions found using metric MDS and label + color the points in the plot by
+Tissue Type. Discuss what you learn from this plot
+```{r}
+dist2.samm= isoMDS(dist2, k=2)
+
+plot(dist2.samm$points, type="n")
+text(dist2.samm$points, labels = as.character(Alontop$Tissue.Type), col= as.numeric(Alontop$Tissue.Type)+2, cex=0.6)
+title(main = "metrics for cell cancers (k=2)")
+
+```
+
+Repeat all aspects of part (b) using 𝑘 = 3 dimensions. Does the third dimension help
+differentiate the cancerous and benign tumor tissue samples?
+```{r}
+
+#for the 3d
+summary(as.numeric(dist2))
+dist2.samm3= isoMDS(dist2, k=3)
+```
+
+```{r eval=FALSE, include=FALSE}
+plot3d(dist2.samm3$points, type="n")
+text3d(dist2.samm3$points, texts = as.character(Alontop$Tissue.Type), col= as.numeric(Alontop$Tissue.Type)+2, cex=0.6)
+#title(main = "metrics for cell cancers (k=3)")
+```
+
+
+comment = 
+When using sammon, the stress levels are lower but with a higher dimension, the stress levels
+also increase. In this case, the 2d representation is way better than the 3d. However, when using
+isoMDS scaling, the stress on the 3d representation is was smaller compared to the 2d
+representation
+
+
+d.) Using the sample correlation matrix (𝑅) as a measure of variable similarity form a distance
+matrix from it (use one of the schemes for turning similarity measures into a dissimilarity
+measures). Using this variable distance matrix conduct a non-metric MDS using 𝑘 = 2
+dimensions. Construct a plot of these dimensions labeling the points using the gene names.
+Do there are appear to groups of genes that express together? If so, pick one of the groups
+a small number of members and list the genes that make up that group
+
+
+```{r}
+library(corrplot)
+alon.cor = cor(alon.mat)
+#alon.cor
+corrplot(alon.cor)
+```
+
+```{r}
+#cor for 2d
+var.dist= sqrt(2*(1-alon.cor))
+var.mds=cmdscale(var.dist, k=2)
+```
+
+
+
+
+
+```{r}
+plot(var.mds,xlab = "dim 1",ylab ="dim 2", type ="n")
+text(var.mds,labels = names(alon.mat))
+```
+
+
+comment 
+genes in the same group.
+• M80815
+• D29808
+• H64489
+• Z49269.2
+• Z49269
+• F71025
+• U19969
+• M76378.2
+• M7678
+• M7678.3
+• M63391
+
+e.)
+Repeat all aspects of part (d) using 𝑘 = 3 dimensions.
+```{r}
+#cor for 3d
+var.dist3= sqrt(2*(1-alon.cor))
+var.mds3=cmdscale(var.dist, k=3)
+```
+
+
+
+```{r eval=FALSE, include=FALSE}
+plot3d(var.mds3,xlab = "dim 1",ylab ="dim 2", type ="n")
+text3d(var.mds3,texts = names(alon.mat))
+```
+
+
+
+
+
+Problem 3 – Dune Meadow Species Communities
+In their paper “Data Analysis in Community and Landscape Ecology” Jongman, R.H.G, ter Braak,
+C.J.F & van Tongeren, O.F.R., present the results from a study examining 20 dune meadow sites
+and counting the presence of 30 different species found within these sites. There were also
+environmental features of the sites measured such as moisture, soil depth, and land
+management. These data are contained in the file: Dune with Environmentals.csv.
+Using the Bray-Curtis measure throughout, form distance matrices for site-to-site (row)
+differences and species-to-species (variables) differences, then carry out a thorough MDS of
+these data for sites and species. Create plots of your MDS results labeling sites, or species,
+whichever is appropriate. Use the environmental factors to add more information to these
+displays through use of color-coding or bubbles (or both).
+
+ for the site plot(s) and 10 pts. for the species MDS plot(s)
+Variables:
+• Site – site number 1 – 20
+• A1 – thickness of soil A1 horizon
+• Moisture – ordered factor denoting moisture level 1 < 2 < 4 < 5
+• Management - a factor with levels: BF (Biological farming), HF (Hobby farming), NM
+(Nature Conservation Management), and SF (Standard Farming)
+• Use – ordered factor of land use Hayfield < Haypastu < Pasture
+• Manure – ordered factors with levels 0 < 1 < 2 < 3 < 4\
+• Achimill – Callcusp – species counts at each site
+
+```{r}
+Dune <- read.csv("C:/Users/fb8502oa/Desktop/DSCI 415/DSCI 415 fall/Dune with Environmentals.csv")
+View(Dune)
+```
+
+```{r}
+#dim(Dune)
+spec.mat= Dune[,-c(1:6)]
+head(spec.mat)
+spec4.mat= spec.mat[, colSums(spec.mat)>4]
+colSums(spec4.mat)
+rowSums(spec4.mat)
+dim(spec4.mat)
+```
+
+```{r}
+
+library(proxy)
+site.dist= dist(spec4.mat,method="Bray")
+site.iso = isoMDS(site.dist, k=2)
+plot(site.iso$point, type="n")
+text(site.iso$point, as.character(Dune$Site), col= as.numeric(Dune$Management)+1)
+```
+
+```{r}
+
+#transposing the matrix
+tspec4.mat= t(spec4.mat)
+spec.dist =dist(tspec4.mat, method= "Bray")
+spec.iso = isoMDS(spec.dist, k=2)
+plot(spec.iso$points, type="n")
+text(spec.iso$points, as.character(row.names(tspec4.mat)),cex=0.6)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
