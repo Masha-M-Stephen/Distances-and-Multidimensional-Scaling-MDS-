@@ -961,3 +961,5 @@ text(spec.iso$points, as.character(row.names(tspec4.mat)),cex=0.6)
 ```
 
 ![](mds-code_files/figure-markdown_github/unnamed-chunk-20-1.png)
+
+.
